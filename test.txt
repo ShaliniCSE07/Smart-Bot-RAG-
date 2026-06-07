@@ -1,0 +1,4 @@
+Hello, this is a test document for the smartbot RAG application.
+It contains some text about weather and chatbots to test the vector store ingestion.
+Weather in New York is currently sunny and 75 degrees Fahrenheit.
+Chatbots are useful tools to query information from documents.

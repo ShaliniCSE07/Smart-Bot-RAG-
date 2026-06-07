@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark theme color tokens */
+:root {
+  --bg-primary: #0F0F1A;
+  --bg-secondary: #1A1A2E;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --bg-card-hover: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(124, 58, 237, 0.4);
+  --gradient-main: linear-gradient(135deg, #7C3AED, #2563EB, #06B6D4);
+  --gradient-btn: linear-gradient(135deg, #7C3AED, #2563EB);
+  --gradient-summarize: linear-gradient(135deg, #F59E0B, #EF4444);
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #475569;
+  --accent-purple: #7C3AED;
+  --accent-blue: #2563EB;
+  --accent-cyan: #06B6D4;
+  --user-bubble: linear-gradient(135deg, #7C3AED, #2563EB);
+  --assistant-bubble: rgba(255, 255, 255, 0.05);
+  --scrollbar-thumb: rgba(124, 58, 237, 0.4);
+}
+
+/* Global styles */
+body, html {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+::selection {
+  background: rgba(124, 58, 237, 0.3);
+  color: var(--text-primary);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.6);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(124, 58, 237, 0.2);
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes bounce-staggered-1 {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-8px); opacity: 1; }
+}
+
+@keyframes bounce-staggered-2 {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-8px); opacity: 1; }
+}
+
+@keyframes bounce-staggered-3 {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-8px); opacity: 1; }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.2s ease;
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s infinite;
+}

@@ -1,0 +1,4 @@
+SmartBot is a high-performance RAG chatbot system.
+It supports advanced document QA with citations.
+The author of SmartBot is Shalini, a computer science engineer.
+SmartBot runs on a FastAPI and React tech stack.
