@@ -43,7 +43,7 @@ def _batched(lst: List[str], size: int) -> List[List[str]]:
 async def _collect_groq_text(client, system_prompt: str, user_content: str) -> str:
     """Run a NON-streaming Groq call and return the full text."""
     completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_content},
@@ -97,7 +97,7 @@ async def _stream_summarize(doc_id: str) -> AsyncGenerator[str, None]:
 
     try:
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": COMBINE_SYSTEM_PROMPT},
                 {"role": "user",   "content": combined_input},

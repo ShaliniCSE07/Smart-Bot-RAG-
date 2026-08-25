@@ -75,7 +75,7 @@ async def stream_groq_response(
     full_answer = ""
     try:
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=messages,
             stream=True
         )
@@ -112,44 +112,68 @@ def generate_followup_questions(
     """
     try:
         client = get_groq_client()
-        context_preview = "\n".join(context_chunks[:3])
-        
-        prompt = f"""Based on the following document context, user question, and assistant answer, generate exactly 3 short follow-up questions the user might want to ask next.
+        context_preview = "\n".join(context_chunks[:3])[:1500]  # limit context size
 
-Document context (excerpt):
-{context_preview}
+        system_msg = (
+            "You are a helpful assistant. Your ONLY job is to generate follow-up questions. "
+            "You must respond with ONLY a JSON array of exactly 3 short question strings. "
+            "No explanation, no markdown, no numbering — just the JSON array. "
+            'Example: ["What caused the failure?", "When was the last inspection?", "Who is responsible?"]'
+        )
 
-User question: {question}
-Assistant answer: {answer}
+        user_msg = (
+            f"Given this conversation about a document, suggest 3 follow-up questions "
+            f"(each under 12 words, specific to the document).\n\n"
+            f"User asked: {question}\n\n"
+            f"Assistant answered: {answer[:500]}\n\n"
+            f"Document excerpt:\n{context_preview}"
+        )
 
-Rules:
-- Each question must be specific to this document
-- Keep each question under 12 words
-- Do not number them
-- Return ONLY a JSON array of 3 strings, nothing else
-- Example format: ["Question 1?", "Question 2?", "Question 3?"]
-"""
-        
+        print("[SUGGESTIONS] Generating follow-up questions...")
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=200,
+            model="openai/gpt-oss-20b",
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg},
+            ],
+            max_tokens=2000,  # reasoning models need more tokens for internal thinking
+            temperature=0.7,
             stream=False
         )
-        
-        raw = response.choices[0].message.content.strip()
+
+        choice = response.choices[0]
+        raw = (choice.message.content or "").strip()
+        finish_reason = choice.finish_reason
+        print(f"[SUGGESTIONS] finish_reason={finish_reason} | Raw: {raw[:300]}")
+
+        # Some reasoning models put output in the reasoning field when content is empty
+        if not raw and hasattr(choice.message, 'reasoning') and choice.message.reasoning:
+            raw = (choice.message.reasoning or "").strip()
+            print(f"[SUGGESTIONS] Falling back to reasoning field: {raw[:200]}")
+
         # Strip markdown code fences if present
         raw = raw.replace("```json", "").replace("```", "").strip()
         
+        # Try to extract JSON array even if wrapped in extra text
+        import re
+        match = re.search(r'\[.*\]', raw, re.DOTALL)
+        if match:
+            raw = match.group(0)
+
         try:
             questions = json.loads(raw)
             if isinstance(questions, list) and len(questions) > 0:
+                # Ensure all items are strings
+                questions = [str(q) for q in questions if q]
+                print(f"[SUGGESTIONS] Success: {questions[:3]}")
                 return questions[:3]
-        except Exception:
-            pass
+            else:
+                print(f"[SUGGESTIONS] Parsed but not a valid list: {type(questions)}")
+        except Exception as parse_err:
+            print(f"[SUGGESTIONS] JSON parse failed: {parse_err} | raw: {raw[:200]}")
         return []
     except Exception as e:
-        # Fail silently - never break chat due to suggestions
+        print(f"[SUGGESTIONS] Exception: {e}")
         return []
 
 def build_messages_multi(
@@ -218,7 +242,7 @@ async def stream_groq_response_multi(
 
     try:
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=messages,
             stream=True
         )

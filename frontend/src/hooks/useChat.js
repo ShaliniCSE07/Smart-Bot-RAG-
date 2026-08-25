@@ -58,10 +58,11 @@ export const useChat = () => {
         },
         (suggs) => {
           // On suggestions
+          console.log('[CHAT] Received suggestions:', suggs);
           setSuggestions(suggs || []);
         },
         () => {
-          // On done
+          // On done - also stop streaming here so suggestions render immediately
           setMessages(prev => {
             const copy = [...prev];
             if (copy[assistantMsgIndex]) {
@@ -69,6 +70,7 @@ export const useChat = () => {
             }
             return copy;
           });
+          setIsStreaming(false);
         },
         (errMsg) => {
           // On error
@@ -93,6 +95,7 @@ export const useChat = () => {
         return copy;
       });
     } finally {
+      // Ensure streaming is stopped even if onDone wasn't called
       setIsStreaming(false);
     }
   };
